@@ -4,7 +4,7 @@
  * Salida estricta conforme al OpenAPI JSON Schema del agente.
  */
 
-import {
+import type {
   SyntheticClaimInput,
   AgentStructuredOutput,
   ClaimType,
@@ -14,7 +14,7 @@ import {
   AffectedAmountBand,
   AffectedItem,
   GuardEvaluationDetail,
-} from '../types/claim';
+} from '../types/claim.ts';
 
 function normalize(str: string): string {
   return (str || '')
@@ -66,9 +66,9 @@ export function classifyClaim(
     candidateType = 'unclear';
   }
 
-  const hasDamageWords = /rot|dan|derram|aplast|abiert|chorre|incomible|fisur/i.test(normText);
-  const hasWrongWords = /equivoc|no es lo que pedi|otra cosa|distinto|vino con|mandaron otr/i.test(normText);
-  const hasMissingWords = /falto|no vino|no llego|olvidaron|falta|no me trajeron/i.test(normText);
+  const hasDamageWords = /\b(rot[oa]s?|danad[oa]s?|danos?|derram[a-z]*|aplastad[oa]s?|abiert[oa]s?|chorre[a-z]*|incomible|fisur[a-z]*|rajad[oa]s?|quebrad[oa]s?|reventad[oa]s?|se salio)\b/i.test(normText);
+  const hasWrongWords = /\b(equivocad[oa]s?|no es lo que pedi|otra cosa|distinto|vino con|mandaron otr[oa]s?|diferente)\b/i.test(normText);
+  const hasMissingWords = /\b(no vino|no llego|no me trajeron|falto|faltan|olvidaron|falta|incompleto)\b/i.test(normText);
 
   let confidence = 0.95;
   let notes = 'El texto del cliente es consistente con el motivo seleccionado en el menú.';
@@ -197,8 +197,9 @@ export function evaluateEvidenceStatus(
   if (
     desc.includes('no muestra el producto') ||
     desc.includes('otro objeto') ||
-    desc.includes('fondo') ||
-    desc.includes('mesa vacia')
+    desc.includes('mesa vacia') ||
+    desc.includes('superficie vacia') ||
+    desc.includes('solo se ve el fondo')
   ) {
     observationPhrases.push('La toma fotográfica muestra una superficie u objeto ajeno al artículo indicado en el reclamo.');
     return {

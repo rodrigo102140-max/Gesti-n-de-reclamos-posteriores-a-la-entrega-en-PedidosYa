@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import { evaluateSyntheticClaim } from './src/lib/claimEngine.ts';
 import { BENCHMARK_CASES } from './src/data/benchmarkCases.ts';
-import { SyntheticClaimInput } from './src/types/claim.ts';
+import { DEFAULT_DEMO_CASES } from './src/data/demoCasesData.ts';
+import type { SyntheticClaimInput } from './src/types/claim.ts';
 
 dotenv.config();
 
@@ -117,6 +118,59 @@ app.get('/api/benchmark', (_req, res) => {
   });
 });
 
+// Registro en memoria de casos de demostración en el servidor
+let serverDemoCases = [...DEFAULT_DEMO_CASES];
+
+/**
+ * Endpoints para el Registro de Casos de Demostración
+ */
+app.get('/api/demo-cases', (_req, res) => {
+  return res.json({
+    total: serverDemoCases.length,
+    cases: serverDemoCases,
+  });
+});
+
+app.get('/api/demo-cases/search', (req, res) => {
+  const q = String(req.query.q || '').trim().toLowerCase();
+  if (!q) {
+    return res.json({ found: null });
+  }
+
+  const match = serverDemoCases.find(
+    (c) =>
+      c.id.toLowerCase() === q ||
+      c.case_number.toLowerCase() === q ||
+      c.order_data.order_id.toLowerCase() === q ||
+      c.claim_input_payload.case_id.toLowerCase() === q ||
+      c.name.toLowerCase().includes(q) ||
+      c.claimed_product.name.toLowerCase().includes(q)
+  );
+
+  return res.json({ found: match || null });
+});
+
+app.post('/api/demo-cases', (req, res) => {
+  const newCase = req.body;
+  if (!newCase || !newCase.id || !newCase.name) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios en el caso' });
+  }
+
+  const idx = serverDemoCases.findIndex((c) => c.id === newCase.id);
+  if (idx >= 0) {
+    serverDemoCases[idx] = newCase;
+  } else {
+    serverDemoCases.unshift(newCase);
+  }
+
+  return res.json({ success: true, count: serverDemoCases.length, case: newCase });
+});
+
+app.post('/api/demo-cases/reset', (_req, res) => {
+  serverDemoCases = [...DEFAULT_DEMO_CASES];
+  return res.json({ success: true, count: serverDemoCases.length, cases: serverDemoCases });
+});
+
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';
 
@@ -134,8 +188,9 @@ async function startServer() {
     });
   }
 
-  app.listen(port, () => {
-    console.log(`Server listening on port ${port} (mode: ${isProd ? 'production' : 'development'})`);
+  const host = '0.0.0.0';
+  app.listen(Number(port), host, () => {
+    console.log(`Server listening on ${host}:${port} (mode: ${isProd ? 'production' : 'development'})`);
   });
 }
 

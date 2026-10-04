@@ -3,7 +3,7 @@
  * Cobertura completa de SIM_GUARD_001 a 006 y SIM_RULE_001 a 006.
  */
 
-import { BenchmarkCase } from '../types/claim';
+import type { BenchmarkCase } from '../types/claim.ts';
 
 export const BENCHMARK_CASES: BenchmarkCase[] = [
   {

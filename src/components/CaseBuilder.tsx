@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { SyntheticClaimInput, SyntheticOrderItem } from '../types/claim';
 import { BENCHMARK_CASES } from '../data/benchmarkCases';
+import { DEFAULT_DEMO_CASES } from '../data/demoCasesData';
 
 interface CaseBuilderProps {
   currentInput: SyntheticClaimInput;
@@ -29,9 +30,14 @@ export const CaseBuilder: React.FC<CaseBuilderProps> = ({
 }) => {
   const [useCustomProductName, setUseCustomProductName] = useState(false);
 
-  // Carga un caso preset desde los benchmarks
+  // Carga un caso preset desde los casos de demostración o benchmarks
   const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
+    const demoFound = DEFAULT_DEMO_CASES.find((d) => d.id === selectedId);
+    if (demoFound) {
+      onChangeInput(JSON.parse(JSON.stringify(demoFound.claim_input_payload)));
+      return;
+    }
     const found = BENCHMARK_CASES.find((b) => b.id === selectedId);
     if (found) {
       onChangeInput(JSON.parse(JSON.stringify(found.input)));
@@ -136,7 +142,7 @@ export const CaseBuilder: React.FC<CaseBuilderProps> = ({
 
         {/* Preset Selector */}
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-slate-400">Cargar caso de prueba:</span>
+          <span className="text-xs text-slate-400">Cargar caso:</span>
           <select
             onChange={handleLoadPreset}
             defaultValue=""
@@ -145,11 +151,20 @@ export const CaseBuilder: React.FC<CaseBuilderProps> = ({
             <option value="" disabled>
               Seleccionar caso...
             </option>
-            {BENCHMARK_CASES.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.id} - {b.title}
-              </option>
-            ))}
+            <optgroup label="Casos de Demostración">
+              {DEFAULT_DEMO_CASES.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.id} - {d.name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Suite de Benchmarks">
+              {BENCHMARK_CASES.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.id} - {b.title}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </div>
       </div>

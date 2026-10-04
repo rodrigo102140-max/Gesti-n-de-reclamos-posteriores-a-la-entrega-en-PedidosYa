@@ -2,14 +2,16 @@ import React from 'react';
 import { ShieldAlert, BookOpen, Sparkles, Scale, RefreshCw } from 'lucide-react';
 
 interface HeaderProps {
-  activeTab: 'workbench' | 'benchmark' | 'raw_json' | 'rules';
-  setActiveTab: (tab: 'workbench' | 'benchmark' | 'raw_json' | 'rules') => void;
+  activeTab: 'workbench' | 'demo_registry' | 'benchmark' | 'raw_json' | 'rules';
+  setActiveTab: (tab: 'workbench' | 'demo_registry' | 'benchmark' | 'raw_json' | 'rules') => void;
+  demoCasesCount?: number;
   onResetCase?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
+  demoCasesCount = 8,
   onResetCase,
 }) => {
   return (
@@ -40,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-1.5 flex-wrap">
             <button
               onClick={() => setActiveTab('workbench')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -50,6 +52,20 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               Evaluador Interactivo
+            </button>
+            <button
+              onClick={() => setActiveTab('demo_registry')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                activeTab === 'demo_registry'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-rose-300" />
+              <span>Registro de Casos</span>
+              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-slate-850 border border-slate-700 font-mono text-rose-300">
+                {demoCasesCount}
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('benchmark')}
